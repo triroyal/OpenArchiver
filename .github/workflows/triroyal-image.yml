@@ -1,16 +1,12 @@
 name: triroyal-image
 
 # Builds the Triroyal image (upstream release + local patches) and pushes it to GHCR.
-# Push a tag like v0.6.2-tr1 to build; or run it by hand from the Actions tab.
+# Every push to the triroyal branch builds ghcr.io/triroyal/open-archiver:v<upstream version>-tr-<short sha>.
 on:
     push:
-        tags:
-            - 'v*-tr*'
+        branches:
+            - triroyal
     workflow_dispatch:
-        inputs:
-            tag:
-                description: 'Image tag to publish (e.g. v0.6.2-tr2)'
-                required: true
 
 permissions:
     contents: read
@@ -24,7 +20,7 @@ jobs:
 
             - name: Resolve tag
               id: tag
-              run: echo "tag=${{ inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+              run: echo "tag=v$(node -p 'require("./package.json").version')-tr-$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
             - uses: docker/login-action@v3
               with:
